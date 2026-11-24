@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+    steps:
+      - name: Отримати код
+        uses: actions/checkout@v7
+
+      - name: Налаштувати Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Встановити залежності
+        run: npm ci
+
+      - name: Перевірити залежності на вразливості
+        run: npm audit --audit-level=high
+
+      - name: Перевірити стиль
+        run: npm run lint
+
+      - name: Запустити тести
+        run: npm test
+
+      - name: Зібрати проєкт
+        run: npm run build
+
+      - name: Зберегти збірку
+        if: matrix.node == 22
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-node-22
+          path: dist
+          retention-days: 7
