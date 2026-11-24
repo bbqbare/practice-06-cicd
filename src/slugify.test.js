@@ -3,7 +3,7 @@ import { slugify } from './slugify.js';
 
 describe('slugify', () => {
   it('замінює пробіли дефісами та переводить у нижній регістр', () => {
-    expect(slugify('Hello World')).toBe('incorrect-result');
+    expect(slugify('Hello World')).toBe('hello-world');
   });
 
   it('прибирає зайві символи на краях', () => {
